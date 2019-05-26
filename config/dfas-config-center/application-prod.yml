@@ -1,0 +1,105 @@
+server:
+    port: 50001
+logging:
+    level:
+         com.yhfin.fcbp: INFO
+spring:
+    profiles:
+        active: prod
+    cloud:
+      inetutils:
+        preferred-networks: 192.168.31.
+    datasource:
+        name: test
+        url: jdbc:oracle:thin:@127.0.0.1:1521:orcl
+        username: fcbp_test
+        password: fcbp_test
+        #使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: oracle.jdbc.driver.OracleDriver
+        filters: stat
+        maxActive: 20
+        initialSize: 1
+        maxWait: 60000
+        minIdle: 1
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: select 'x' from dual
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxOpenPreparedStatements: 20
+    redis:
+        database: 0
+        host: 127.0.0.1
+        password: #默认为空
+        port: 6379
+        pool:
+          max-idle: 8 #最大空闲连接
+          min-idle: 0 #最小空闲连接
+          max-active: 8 #连接池最大连接数（使用负值表示没有限制）
+        
+eureka:       
+ client:
+   serviceUrl: 
+     defaultZone: http://ycmpadmin:ycmpadmin@192.168.31.194:10012/eureka
+ instance:
+   lease-renewal-interval-in-seconds: 10 # 续约更新时间间隔（默认是30秒）
+   lease-expiration-duration-in-seconds: 30 #服务失效时间。默认是90秒，也就是如果Eureka Server在90秒内没有接收到来自ServiceProvider的Renew操作，就会把Service Provider剔除
+   instance-id: ${spring.cloud.client.hostname}:${spring.cloud.client.ipAddress}:${random.int} #设置实例名
+   prefer-ip-address: true #使用IP地址来做注册中心地址
+     
+mybatis: 
+   table:
+     auto: update
+   model: 
+     pack: com.yhfin.fcbp.cashtransfer.model
+   database:
+     type: oracle
+   actable: 
+     name: fcbp-biz-cashtransfer
+     version: 1.0
+     
+#=====feign相关配置===============================
+feign:
+  hystrix:
+    enabled: true  #feign开启hystrix
+  okhttp:
+     enabled: true #feign使用okhttp提高性能
+  compression:
+     request:
+        enabled: true #request and response GZIP compress
+        mime-types: text/xml,application/xml,application/json #compress supportive mime types
+        min-request-size: 2048
+     response:
+        enabled: true
+ribbon:
+   ConnectTimeout: 1000 # 设置连接超时时间 1秒
+   ReadTimeout: 6000    # 设置读取超时时间 6秒
+   OkToRetryOnAllOperations: false  # 对所有操作请求都进行重试
+   MaxAutoRetriesNextServer: 2   # 切换实例的重试次数
+   MaxAutoRetries: 1  # 对当前实例的重试次数
+   eager-load:
+      enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000  # 设置熔断超时时间10s
+#========================================
+ 
+fcbp:
+  cashtransfer:
+      websocket:
+       endpoint: /cashtransfer/websocket/endpoint
+       destination: /cashReport/balance/	   
+#ycmp-monitor监控需要将management.security.enabled 设置为false关闭掉
+management:
+  security:
+    enabled: false
+email: 
+  title: 华润元大基金管理有限公司
+  suffix: yhfin.com
